@@ -1,5 +1,3 @@
-const 정답 = "SNAKE";
-
 let attempts = 0; // 시도 횟수
 let index = 0; // 인덱스 설정
 let timer;
@@ -30,24 +28,33 @@ function appStart() {
     index = 0;
   };
 
-  const handleEnterKey = () => {
+  const handleEnterKey = async () => {
     // 엔터키 누르기
     let 맞은_갯수 = 0;
+
+    // 서버에서 정답을 받아오는 코드
+    const 응답 = await fetch("/answer");
+    const 정답 = await 응답.json();
+
     for (let i = 0; i < 5; i++) {
       const block = document.querySelector(
         `.board-block[data-index='${attempts}${i}']`
       );
       const 입력한_글자 = block.innerText;
+      const keyboard = document.querySelector(
+        `.keyboard-block[data-key='${입력한_글자}']`
+      );
       const 정답_글자 = 정답[i];
       if (입력한_글자 === 정답_글자) {
         맞은_갯수 += 1;
         block.style.background = "#6AAA64";
+        keyboard.style.background = "#6AAA64";
       } else if (정답.includes(입력한_글자)) {
         block.style.background = "#c9b458";
+        keyboard.style.background = "#c9b458";
       } else block.style.background = "#787c7e";
 
       block.style.color = "white";
-      changeKeyboardColor(입력한_글자);
     }
 
     if (맞은_갯수 === 5) gameover();
@@ -82,37 +89,16 @@ function appStart() {
     }
   };
 
-  const backclick = () => {
-    handleBackspace();
-  };
-
-  const enterclick = () => {
-    handleEnterKey();
-  };
-
-  const changeKeyboardColor = (입력한_글자) => {
-    for (let i = 0; i < 5; i++) {
-      const keyboard = document.querySelector(
-        `.keyboard-block[data-key='${입력한_글자}']`
-      );
-      const 정답_글자 = 정답[i];
-      if (입력한_글자 === 정답_글자) {
-        keyboard.style.background = "#6AAA64";
-      } else if (정답.includes(입력한_글자)) {
-        keyboard.style.background = "#c9b458";
-      }
-    }
-  };
-
   const handleclick = (event) => {
+    // 마우스로 키보드 클릭
     const clickkey = event.target.dataset;
     const key = clickkey.key;
     const thisBlock = document.querySelector(
       `.board-block[data-index='${attempts}${index}']`
     );
-    if (key === "BACK") backclick();
+    if (key === "BACK") handleBackspace();
     else if (index === 5) {
-      if (key === "ENTER") enterclick();
+      if (key === "ENTER") handleEnterKey();
       else return;
     } else if (key.includes) {
       thisBlock.innerText = key;
@@ -126,12 +112,6 @@ function appStart() {
     function setTime() {
       const 현재_시간 = new Date();
       const 흐른_시간 = new Date(현재_시간 - 시작_시간);
-      // const 연도 = 현재_시간.getFullYear();
-      //const 달 = (현재_시간.getMonth() + 1).toString().padStart(2, "0");
-      // const 날짜 = 현재_시간.getDate().toString().padStart(2, "0");
-      // const 지금몇시 = 현재_시간.getHours().toString().padStart(2, "0");
-      // const 지금몇분 = 현재_시간.getMinutes().toString().padStart(2, "0");
-      // const 지금몇초 = 현재_시간.getSeconds().toString().padStart(2, "0");
       const 분 = 흐른_시간.getMinutes().toString().padStart(2, "0");
       const 초 = 흐른_시간.getSeconds().toString().padStart(2, "0");
       const timeDiv = document.querySelector("#timer");
